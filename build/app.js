@@ -1,21 +1,27 @@
 import { WORDS } from "./words.js";
+import { FIVEWORDS } from "./fivewords.js";
+import { FOURWORDS } from "./fourwords.js";
+import { SIXWORDS } from "./sixwords.js";
 
 const NUMBER_OF_GUESSES = 6;
 let guessesRemaining = NUMBER_OF_GUESSES;
 let currentGuess = [];
+let wordSize = 5;
 let nextLetter = 0;
-let rightGuessString = WORDS[Math.floor(Math.random() * WORDS.length)];
+let rightGuessString = FIVEWORDS[Math.floor(Math.random() * FIVEWORDS.length)];
 
 console.log(rightGuessString);
 
 function initBoard() {
   let board = document.getElementById("game-board");
 
+  board.innerHTML = "";
+
   for (let i = 0; i < NUMBER_OF_GUESSES; i++) {
     let row = document.createElement("div");
     row.className = "letter-row";
 
-    for (let j = 0; j < 5; j++) {
+    for (let j = 0; j < wordSize; j++) {
       let box = document.createElement("div");
       box.className = "letter-box";
       row.appendChild(box);
@@ -61,7 +67,7 @@ function checkGuess() {
     guessString += val;
   }
 
-  if (guessString.length != 5) {
+  if (guessString.length != wordSize) {
     toastr.error("Not enough letters!");
     return;
   }
@@ -71,23 +77,18 @@ function checkGuess() {
     return;
   }
 
-  var letterColor = ["gray", "gray", "gray", "gray", "gray"];
+  var letterColor = ["#2b2a33", "#2b2a33", "#2b2a33", "#2b2a33", "#2b2a33", "#2b2a33"];
 
-  //check green
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < wordSize; i++) {
     if (rightGuess[i] == currentGuess[i]) {
       letterColor[i] = "#538d4e";
       rightGuess[i] = "#";
     }
   }
 
-  //check yellow
-  //checking guess letters
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < wordSize; i++) {
     if (letterColor[i] == "#538d4e") continue;
-
-    //checking right letters
-    for (let j = 0; j < 5; j++) {
+    for (let j = 0; j < wordSize; j++) {
       if (rightGuess[j] == currentGuess[i]) {
         letterColor[i] = "#b59f3b";
         rightGuess[j] = "#";
@@ -95,13 +96,11 @@ function checkGuess() {
     }
   }
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < wordSize; i++) {
     let box = row.children[i];
-    let delay = 250 * i;
+    let delay = 320 * i;
     setTimeout(() => {
-      //flip box
       animateCSS(box, "flipInX");
-      //shade box
       box.style.backgroundColor = letterColor[i];
       shadeKeyBoard(guessString.charAt(i) + "", letterColor[i]);
     }, delay);
@@ -124,7 +123,7 @@ function checkGuess() {
 }
 
 function insertLetter(pressedKey) {
-  if (nextLetter === 5) {
+  if (nextLetter === wordSize) {
     return;
   }
   pressedKey = pressedKey.toLowerCase();
@@ -139,16 +138,13 @@ function insertLetter(pressedKey) {
 }
 
 const animateCSS = (element, animation, prefix = "animate__") =>
-  // We create a Promise and return it
   new Promise((resolve, reject) => {
     const animationName = `${prefix}${animation}`;
-    // const node = document.querySelector(element);
     const node = element;
     node.style.setProperty("--animate-duration", "0.3s");
 
     node.classList.add(`${prefix}animated`, animationName);
 
-    // When the animation ends, we clean the classes and resolve the Promise
     function handleAnimationEnd(event) {
       event.stopPropagation();
       node.classList.remove(`${prefix}animated`, animationName);
@@ -200,30 +196,53 @@ document.getElementById("keyboard-cont").addEventListener("click", (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Wait for the DOM to be fully loaded before attaching the event listener
-
-  // ... (your existing code)
-
-  // Add event listener for mode buttons
   document.getElementById("four-letter-mode").addEventListener("click", function () {
-    switchMode("four-letter");
+    switchMode(4);
   });
 
   document.getElementById("five-letter-mode").addEventListener("click", function () {
-    switchMode("five-letter");
+    switchMode(5);
   });
 
   document.getElementById("six-letter-mode").addEventListener("click", function () {
-    switchMode("six-letter");
+    switchMode(6);
   });
 
-  // ... (your existing code)
+  function switchMode(size) {
+    wordSize = size;
+    restartGame();
+  }
 
-  function switchMode(mode) {
-    // Perform actions based on the selected mode
-    // For example, you can update the game settings, restart the game, or load a new set of words
-    // Customize this function based on your specific requirements
-    console.log("Switching to " + mode + " mode");
+  function resetKeyboardColors() {
+    const defaultColor = "rgb(129, 129, 129)";
+    const keyboardButtons = document.getElementsByClassName("keyboard-button");
+  
+    for (const button of keyboardButtons) {
+      button.style.backgroundColor = defaultColor;
+    }
+  }
+  
+  function restartGame() {
+    guessesRemaining = NUMBER_OF_GUESSES;
+    currentGuess = [];
+    nextLetter = 0;
+    rightGuessString = getRandomWord(wordSize);
+    console.log(rightGuessString);
+    resetKeyboardColors();
+    initBoard();
+  }
+  
+  function getRandomWord(size) {
+    console.log(size);
+    if (size == 4){
+      return FOURWORDS[Math.floor(Math.random() * FOURWORDS.length)];
+    }
+    if (size == 5){
+      return FIVEWORDS[Math.floor(Math.random() * FIVEWORDS.length)];
+    }
+    if (size == 6){
+      return SIXWORDS[Math.floor(Math.random() * SIXWORDS.length)];
+    }
   }
 
 });
